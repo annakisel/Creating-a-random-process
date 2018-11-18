@@ -9,9 +9,9 @@ public class Main {
         try {
             Creator creator = new Creator();
             creator.fillInNoiseFromFile();
-            // creator.fillInMatrix();
-            creator.process();
-            creator.semivar();
+            creator.fillInMatrix();
+            // creator.process();
+            // creator.semivar();
         } catch (FileNotFoundException e) {
             System.out.println("file not found");
         }
@@ -25,14 +25,16 @@ class Creator {
     private double[] semivar;
     private double l;
     private double w;
+    private double[][] matrixSP;
 
     public Creator() {
-        this.n = 100;
-        this.w = 1.0;
-        ksi = new double[this.n + 1];
-        this.l = Math.sqrt(2);
-        x = new double[this.n + 1];
-        semivar = new double[this.n + 1];
+        n = 100;
+        w = 1.0;
+        ksi = new double[n + 1];
+        l = Math.sqrt(2);
+        x = new double[n + 1];
+        semivar = new double[n + 1];
+        matrixSP = new double[5][n + 1];
     }
 
     public double R(double t) {
@@ -61,10 +63,8 @@ class Creator {
             x[i] = random.nextGaussian();
             pw.write(String.valueOf(x[i]) + " ");
             System.out.println(x[i]);
-
         }
         pw.close();
-
     }
 
     public void fillInNoiseFromFile() throws FileNotFoundException {
@@ -75,6 +75,37 @@ class Creator {
 
         }
         sc.close();
+    }
+
+    public void fillInMatrix() throws FileNotFoundException {
+        double sum;
+        double wt = w;
+        int N = (int) Math.round(l / wt) + 1;
+        w = 1;
+        double c0 = 1 / Math.sqrt(N);
+        PrintWriter pw = new PrintWriter("matrix.txt");
+
+        for (int j = 0; j < 5; j++) {
+            if (j > 0) {
+                w /= 2;
+                l = Math.sqrt(Math.pow(1 / w, 2) + 1);
+                wt = w;
+                N = (int) Math.round(l / wt) + 1;
+                c0 = 1 / Math.sqrt(N);
+            }
+            for (int i = 0; i < matrixSP[j].length; i++) {
+                sum = 0;
+                for (int k = 0; k < N - 1; k++) {
+                    if (i - k >= 0) {
+                        sum += x[i - k];
+                    }
+                }
+                matrixSP[j][i] = c0 * sum;
+                pw.write(String.valueOf(matrixSP[j][i]) + ", ");
+            }
+            pw.write("\r\n");
+        }
+        pw.close();
     }
 
     public void process() throws FileNotFoundException {
