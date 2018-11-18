@@ -10,6 +10,7 @@ public class Main {
             Creator creator = new Creator();
             creator.fillInNoiseFromFile();
             creator.fillInMatrix();
+            creator.createZ();
             // creator.process();
             // creator.semivar();
         } catch (FileNotFoundException e) {
@@ -23,6 +24,7 @@ class Creator {
     private double[] ksi;
     private double[] x;
     private double[] semivar;
+    private double[] z;
     private double l;
     private double w;
     private double[][] matrixSP;
@@ -33,6 +35,7 @@ class Creator {
         ksi = new double[n + 1];
         l = Math.sqrt(2);
         x = new double[n + 1];
+        z = new double[n + 1];
         semivar = new double[n + 1];
         matrixSP = new double[5][n + 1];
     }
@@ -103,6 +106,21 @@ class Creator {
                 pw.write(String.valueOf(matrixSP[j][i]) + ", ");
             }
             pw.write("\r\n");
+        }
+        pw.close();
+    }
+
+    public void createZ() throws FileNotFoundException {
+        int b;
+        PrintWriter pw = new PrintWriter("z.txt");
+
+        for (int i = 0; i < z.length; i++) {
+            b = 2;
+            for (int j = 0; j < 5; j++) {
+                z[i] += matrixSP[j][i] * b;
+                b += 2;
+            }
+            pw.write(String.valueOf(z[i]) + ", ");
         }
         pw.close();
     }
