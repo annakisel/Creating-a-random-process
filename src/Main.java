@@ -25,7 +25,6 @@ class Creator {
     private double[] semivar;
     private double l;
     private double w;
-    private double [][]matrixSP;
 
     public Creator() {
         this.n = 100;
@@ -34,7 +33,6 @@ class Creator {
         this.l = Math.sqrt(2);
         x = new double[this.n + 1];
         semivar = new double[this.n + 1];
-        matrixSP = new double[4][n];
     }
 
     public double R(double t) {
