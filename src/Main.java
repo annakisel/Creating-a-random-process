@@ -72,7 +72,6 @@ class Creator {
 
         for (int i = 0; i < x.length; i++) {
             x[i] = sc.nextDouble();
-
         }
         sc.close();
     }
