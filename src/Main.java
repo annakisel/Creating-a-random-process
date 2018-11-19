@@ -13,6 +13,7 @@ public class Main {
             creator.createZ();
             // creator.process();
             // creator.semivar();
+            creator.calcDispersionOfZ();
         } catch (FileNotFoundException e) {
             System.out.println("file not found");
         }
@@ -123,6 +124,26 @@ class Creator {
             pw.write(String.valueOf(z[i]) + ", ");
         }
         pw.close();
+    }
+
+    private double sampleOfZ() {
+        double _z = 0;
+        for (int i = 0; i < n; i++) {
+            _z += z[i];
+        }
+        _z /= n;
+        System.out.println("sampleOfZ " + _z);
+        return _z;
+    }
+
+    public void calcDispersionOfZ() {
+        double d = 0;
+        double _z = sampleOfZ();
+        for (int i = 0; i < n; i++) {
+            d += Math.pow(z[i] - _z, 2);
+        }
+        d /= n;
+        System.out.println("calcDispersionOfZ " + d);
     }
 
     public void process() throws FileNotFoundException {
