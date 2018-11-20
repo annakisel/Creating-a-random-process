@@ -9,11 +9,12 @@ public class Main {
         try {
             Creator creator = new Creator();
             creator.fillInNoiseFromFile();
+            creator.semivar();
             creator.fillInMatrix();
             creator.createZ();
             // creator.process();
-            // creator.semivar();
-            creator.calcDispersionOfZ();
+            // creator.calcDispersionOfZ();
+            creator.calcEstimationOfSemivar();
         } catch (FileNotFoundException e) {
             System.out.println("file not found");
         }
@@ -52,7 +53,7 @@ class Creator {
     public void semivar() throws FileNotFoundException {
         PrintWriter pw = new PrintWriter("semivar.txt");
 
-        for (int i = 0; i < 20; i++) {
+        for (int i = 0; i < 67; i++) {
             semivar[i] = (R(0) - R(i));
             pw.write(String.valueOf(semivar[i]) + ", ");
         }
@@ -93,12 +94,12 @@ class Creator {
                 w /= 2;
                 l = Math.sqrt(Math.pow(1 / w, 2) + 1);
                 wt = w;
-                N = (int) Math.round(l / wt) + 1;
+                N = (int) Math.round(1 / wt) + 1;
                 c0 = 1 / Math.sqrt(N);
             }
             for (int i = 0; i < matrixSP[j].length; i++) {
                 sum = 0;
-                for (int k = 0; k < N - 1; k++) {
+                for (int k = 0; k < N; k++) {
                     if (i - k >= 0) {
                         sum += x[i - k];
                     }
@@ -146,6 +147,28 @@ class Creator {
         System.out.println("calcDispersionOfZ " + d);
     }
 
+    public void calcEstimationOfSemivar() throws FileNotFoundException {
+        System.out.println("calcEstimationOfSemivar");
+        double[][] estim = new double[5][n];
+        double sum;
+        PrintWriter pw = new PrintWriter("estimate.txt");
+
+        for (int j = 0; j < 5; j++) {
+            for (int h = 0; h < n; h++) {
+                sum = 0;
+                for (int i = 1; i < n - h; i++) {
+                    sum += Math.pow(matrixSP[j][i] - matrixSP[j][i + h], 2);
+                }
+                estim[j][h] = sum * 1 / 2 / (n - h);
+                if (h <= 2 * n / 3) {
+                    pw.write(String.valueOf(estim[j][h]) + ", ");
+                }
+            }
+            pw.write("\n");
+        }
+        pw.close();
+    }
+
     public void process() throws FileNotFoundException {
         double wt = w;
         double sum;
@@ -167,4 +190,3 @@ class Creator {
         pw.close();
     }
 }
-
