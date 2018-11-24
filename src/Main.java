@@ -9,11 +9,11 @@ public class Main {
         try {
             Creator creator = new Creator();
             creator.fillInNoiseFromFile();
-            creator.semivar();
+            // creator.semivar();
             creator.fillInMatrix();
             creator.createZ();
             // creator.process();
-            // creator.calcDispersionOfZ();
+            creator.calcDispersionOfZ();
             creator.calcEstimationOfSemivar();
         } catch (FileNotFoundException e) {
             System.out.println("file not found");
@@ -27,30 +27,28 @@ class Creator {
     private double[] x;
     private double[] semivar;
     private double[] z;
-    private double l;
-    private double w;
+    private int t0;
     private double[][] matrixSP;
 
     public Creator() {
         n = 100;
-        w = 1.0;
+        t0 = 1;
         ksi = new double[n + 1];
-        l = Math.sqrt(2);
         x = new double[n + 1];
         z = new double[n + 1];
         semivar = new double[n + 1];
         matrixSP = new double[5][n + 1];
     }
 
-    public double R(double t) {
-        if (Math.abs(t) > (1.0 / w)) {
+    /*public doube R(double t) {
+        if (Math.abs(t) > (1.0 / this.t)) {
             return 0;
         } else {
-            return (1.0 - w * Math.abs(t));
+            return (1.0 - this.t * Math.abs(t));
         }
-    }
+    }*/
 
-    public void semivar() throws FileNotFoundException {
+    /*public void semivar() throws FileNotFoundException {
         PrintWriter pw = new PrintWriter("semivar.txt");
 
         for (int i = 0; i < 67; i++) {
@@ -58,7 +56,7 @@ class Creator {
             pw.write(String.valueOf(semivar[i]) + ", ");
         }
         pw.close();
-    }
+    }*/
 
     public void writeNoiseInFile() throws FileNotFoundException {
         Random random = new Random();
@@ -83,18 +81,15 @@ class Creator {
 
     public void fillInMatrix() throws FileNotFoundException {
         double sum;
-        double wt = w;
-        int N = (int) Math.round(l / wt) + 1;
-        w = 1;
+        int  N = t0;
         double c0 = 1 / Math.sqrt(N);
         PrintWriter pw = new PrintWriter("matrix.txt");
 
         for (int j = 0; j < 5; j++) {
             if (j > 0) {
-                w /= 2;
-                l = Math.sqrt(Math.pow(1 / w, 2) + 1);
-                wt = w;
-                N = (int) Math.round(1 / wt) + 1;
+                t0 *= 2;
+                // wt = t;
+                N = t0;
                 c0 = 1 / Math.sqrt(N);
             }
             for (int i = 0; i < matrixSP[j].length; i++) {
@@ -113,14 +108,11 @@ class Creator {
     }
 
     public void createZ() throws FileNotFoundException {
-        int b;
         PrintWriter pw = new PrintWriter("z.txt");
-
+        double[] b = {2.0, 4.0, 6.0, 8.0, 10.0};
         for (int i = 0; i < z.length; i++) {
-            b = 2;
             for (int j = 0; j < 5; j++) {
-                z[i] += matrixSP[j][i] * b;
-                b += 2;
+                z[i] += matrixSP[j][i] * b[j];
             }
             pw.write(String.valueOf(z[i]) + ", ");
         }
@@ -156,36 +148,15 @@ class Creator {
         for (int j = 0; j < 5; j++) {
             for (int h = 0; h < n; h++) {
                 sum = 0;
-                for (int i = 1; i < n - h; i++) {
+                for (int i = 0; i < n - h - 1; i++) {
                     sum += Math.pow(matrixSP[j][i] - matrixSP[j][i + h], 2);
                 }
-                estim[j][h] = sum * 1 / 2 / (n - h);
-                if (h <= 2 * n / 3) {
-                    pw.write(String.valueOf(estim[j][h]) + ", ");
-                }
+                estim[j][h] = sum * 1.0 / 2.0 / (n - h);
+                // if (h <= 3 * n / 4) {
+                pw.write(String.valueOf(estim[j][h]) + ", ");
+                // }
             }
             pw.write("\n");
-        }
-        pw.close();
-    }
-
-    public void process() throws FileNotFoundException {
-        double wt = w;
-        double sum;
-        int N = (int) Math.round(l / wt) + 1;
-        double c0 = 1 / Math.sqrt(N);
-
-        PrintWriter pw = new PrintWriter("output.txt");
-
-        for (int i = 0; i < ksi.length; i++) {
-            sum = 0;
-            for (int k = 0; k < N - 1; k++) {
-                if (i - k >= 0) {
-                    sum += x[i - k];
-                }
-            }
-            ksi[i] = c0 * sum;
-            pw.write(String.valueOf(ksi[i]) + ", ");
         }
         pw.close();
     }
