@@ -9,12 +9,11 @@ public class Main {
         try {
             Creator creator = new Creator();
             creator.fillInNoiseFromFile();
-            // creator.semivar();
             creator.fillInMatrix();
             creator.createZ();
-            // creator.process();
             creator.calcDispersionOfZ();
             creator.calcEstimationOfSemivar();
+            creator.calcEstimationOfZ();
         } catch (FileNotFoundException e) {
             System.out.println("file not found");
         }
@@ -23,9 +22,7 @@ public class Main {
 
 class Creator {
     private int n;
-    private double[] ksi;
     private double[] x;
-    private double[] semivar;
     private double[] z;
     private int t0;
     private double[][] matrixSP;
@@ -33,30 +30,10 @@ class Creator {
     public Creator() {
         n = 100;
         t0 = 1;
-        ksi = new double[n + 1];
-        x = new double[n + 1];
-        z = new double[n + 1];
-        semivar = new double[n + 1];
-        matrixSP = new double[5][n + 1];
+        x = new double[n];
+        z = new double[n];
+        matrixSP = new double[5][n];
     }
-
-    /*public doube R(double t) {
-        if (Math.abs(t) > (1.0 / this.t)) {
-            return 0;
-        } else {
-            return (1.0 - this.t * Math.abs(t));
-        }
-    }*/
-
-    /*public void semivar() throws FileNotFoundException {
-        PrintWriter pw = new PrintWriter("semivar.txt");
-
-        for (int i = 0; i < 67; i++) {
-            semivar[i] = (R(0) - R(i));
-            pw.write(String.valueOf(semivar[i]) + ", ");
-        }
-        pw.close();
-    }*/
 
     public void writeNoiseInFile() throws FileNotFoundException {
         Random random = new Random();
@@ -81,14 +58,13 @@ class Creator {
 
     public void fillInMatrix() throws FileNotFoundException {
         double sum;
-        int  N = t0;
+        int N = t0;
         double c0 = 1 / Math.sqrt(N);
         PrintWriter pw = new PrintWriter("matrix.txt");
 
         for (int j = 0; j < 5; j++) {
             if (j > 0) {
                 t0 *= 2;
-                // wt = t;
                 N = t0;
                 c0 = 1 / Math.sqrt(N);
             }
@@ -109,7 +85,7 @@ class Creator {
 
     public void createZ() throws FileNotFoundException {
         PrintWriter pw = new PrintWriter("z.txt");
-        double[] b = {2.0, 4.0, 6.0, 8.0, 10.0};
+        double[] b = {1.0, 2.0, 3.0, 4.0, 5.0};
         for (int i = 0; i < z.length; i++) {
             for (int j = 0; j < 5; j++) {
                 z[i] += matrixSP[j][i] * b[j];
@@ -140,7 +116,7 @@ class Creator {
     }
 
     public void calcEstimationOfSemivar() throws FileNotFoundException {
-        System.out.println("calcEstimationOfSemivar");
+        //  System.out.println("calcEstimationOfSemivar");
         double[][] estim = new double[5][n];
         double sum;
         PrintWriter pw = new PrintWriter("estimate.txt");
@@ -148,15 +124,30 @@ class Creator {
         for (int j = 0; j < 5; j++) {
             for (int h = 0; h < n; h++) {
                 sum = 0;
-                for (int i = 0; i < n - h - 1; i++) {
+                for (int i = 0; i < n - h; i++) {
                     sum += Math.pow(matrixSP[j][i] - matrixSP[j][i + h], 2);
                 }
-                estim[j][h] = sum * 1.0 / 2.0 / (n - h);
+                estim[j][h] = sum / 2.0 / (n - h);
                 // if (h <= 3 * n / 4) {
                 pw.write(String.valueOf(estim[j][h]) + ", ");
                 // }
             }
             pw.write("\n");
+        }
+        pw.close();
+    }
+
+    public void calcEstimationOfZ() throws FileNotFoundException {
+        double sum;
+        double buff;
+        PrintWriter pw = new PrintWriter("estimateZ.txt");
+        for (int h = 0; h < n; h++) {
+            sum = 0;
+            for (int i = 0; i < n - h; i++) {
+                sum += Math.pow(z[i] - z[i + h], 2);
+            }
+            buff = sum / 2.0 / (n - h);
+            pw.write(String.valueOf(buff) + ", ");
         }
         pw.close();
     }
