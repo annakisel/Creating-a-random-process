@@ -1,3 +1,7 @@
+import org.apache.commons.math3.linear.Array2DRowRealMatrix;
+import org.apache.commons.math3.linear.RealMatrix;
+import org.apache.commons.math3.stat.correlation.SpearmansCorrelation;
+
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.PrintWriter;
@@ -14,6 +18,8 @@ public class Main {
             creator.calcDispersionOfZ();
             creator.calcEstimationOfSemivar();
             creator.calcEstimationOfZ();
+            creator.checkingCorrelation();
+            creator.checkingSpearmansCorrelation();
         } catch (FileNotFoundException e) {
             System.out.println("file not found");
         }
@@ -150,5 +156,35 @@ class Creator {
             pw.write(String.valueOf(buff) + ", ");
         }
         pw.close();
+    }
+
+    private double[] getColumn(int column) {
+        double[] c = new double[matrixSP.length];
+        for (int i = 0; i < matrixSP.length; i++) {
+            c[i] = matrixSP[i][column];
+        }
+        return c;
+    }
+
+    public void checkingSpearmansCorrelation() {
+        // double[][] m = {{1.0, 2.0}, {2.0, 4.0}};
+        RealMatrix matrix = new Array2DRowRealMatrix(matrixSP);
+        SpearmansCorrelation corrInstance = new SpearmansCorrelation();
+        double print = corrInstance.correlation(getColumn(0), getColumn(3));
+        System.out.println(print);
+    }
+
+    public void checkingCorrelation() {
+        int N = matrixSP.length;
+        double buff;
+        for (int h = 0; h < N; h++) {
+            buff = 0;
+            for (int i = 0; i < N - h; i++) {
+                buff = matrixSP[i][0] * matrixSP[i + h][0];
+            }
+            buff /= (N - h);
+            System.out.print(buff + " ");
+        }
+        System.out.println("");
     }
 }
