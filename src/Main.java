@@ -30,12 +30,16 @@ class Creator {
     private int n;
     private double[] x;
     private double[] z;
-    private int t0;
     private double[][] matrixSP;
+    private double[] r;
+    private double[] b;
 
     public Creator() {
         n = 100;
-        t0 = 1;
+        r = new double[]{1.0, 2.0, 4.0, 8.0, 16.0};
+        b = new double[]{0.1, 0.1, 0.3, 0.3, 0.2};
+        // b = new double[]{1.0, 2.0, 3.0, 4.0, 5.0};
+
         x = new double[n];
         z = new double[n];
         matrixSP = new double[5][n];
@@ -64,14 +68,14 @@ class Creator {
 
     public void fillInMatrix() throws FileNotFoundException {
         double sum;
-        int N = t0;
+
+        double N = r[0];
         double c0 = 1 / Math.sqrt(N);
         PrintWriter pw = new PrintWriter("matrix.txt");
 
         for (int j = 0; j < matrixSP.length; j++) {
             if (j > 0) {
-                t0 *= 2;
-                N = t0;
+                N = r[j];
                 c0 = 1 / Math.sqrt(N);
             }
             for (int i = 0; i < matrixSP[j].length; i++) {
@@ -91,8 +95,6 @@ class Creator {
 
     public void createZ() throws FileNotFoundException {
         PrintWriter pw = new PrintWriter("z.txt");
-        double[] b = {0.1, 0.1, 0.3, 0.3, 0.2};
-        // double[] b = {1.0, 2.0, 3.0, 4.0, 5.0};
         for (int i = 0; i < z.length; i++) {
             for (int j = 0; j < matrixSP.length; j++) {
                 z[i] += matrixSP[j][i] * b[j];
@@ -161,14 +163,12 @@ class Creator {
 
     public void semivarOfZ() throws FileNotFoundException {
         // double[] sZ = new double[n];
-        double sum = 0;
-        double[] b = {0.1, 0.1, 0.3, 0.3, 0.2};
-        double[] r = {1.0, 2.0, 4.0, 8.0, 16.0};
+        double sum;
         PrintWriter pw = new PrintWriter("sZ.txt");
 
         for (int h = 0; h < n; h++) {
             sum = 0;
-            for (int i = 0; i < matrixSP.length; i++) {
+            for (int i = 0; i < b.length; i++) {
                 sum += b[i] * b[i] * h / r[i];
             }
             pw.write(String.valueOf(sum) + ", ");
