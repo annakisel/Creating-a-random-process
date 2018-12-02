@@ -18,8 +18,8 @@ public class Main {
             creator.calcDispersionOfZ();
             creator.calcEstimationOfSemivar();
             creator.calcEstimationOfZ();
-            creator.checkingCorrelation();
-            creator.checkingSpearmansCorrelation();
+            // creator.checkingCorrelation();
+            creator.semivarOfZ();
         } catch (FileNotFoundException e) {
             System.out.println("file not found");
         }
@@ -68,7 +68,7 @@ class Creator {
         double c0 = 1 / Math.sqrt(N);
         PrintWriter pw = new PrintWriter("matrix.txt");
 
-        for (int j = 0; j < 5; j++) {
+        for (int j = 0; j < matrixSP.length; j++) {
             if (j > 0) {
                 t0 *= 2;
                 N = t0;
@@ -91,9 +91,10 @@ class Creator {
 
     public void createZ() throws FileNotFoundException {
         PrintWriter pw = new PrintWriter("z.txt");
-        double[] b = {1.0, 2.0, 3.0, 4.0, 5.0};
+        double[] b = {0.1, 0.1, 0.3, 0.3, 0.2};
+        // double[] b = {1.0, 2.0, 3.0, 4.0, 5.0};
         for (int i = 0; i < z.length; i++) {
-            for (int j = 0; j < 5; j++) {
+            for (int j = 0; j < matrixSP.length; j++) {
                 z[i] += matrixSP[j][i] * b[j];
             }
             pw.write(String.valueOf(z[i]) + ", ");
@@ -123,11 +124,11 @@ class Creator {
 
     public void calcEstimationOfSemivar() throws FileNotFoundException {
         //  System.out.println("calcEstimationOfSemivar");
-        double[][] estim = new double[5][n];
+        double[][] estim = new double[matrixSP.length][n];
         double sum;
         PrintWriter pw = new PrintWriter("estimate.txt");
 
-        for (int j = 0; j < 5; j++) {
+        for (int j = 0; j < matrixSP.length; j++) {
             for (int h = 0; h < n; h++) {
                 sum = 0;
                 for (int i = 0; i < n - h; i++) {
@@ -158,6 +159,24 @@ class Creator {
         pw.close();
     }
 
+    public void semivarOfZ() throws FileNotFoundException {
+        // double[] sZ = new double[n];
+        double sum = 0;
+        double[] b = {0.1, 0.1, 0.3, 0.3, 0.2};
+        double[] r = {1.0, 2.0, 4.0, 8.0, 16.0};
+        PrintWriter pw = new PrintWriter("sZ.txt");
+
+        for (int h = 0; h < n; h++) {
+            sum = 0;
+            for (int i = 0; i < matrixSP.length; i++) {
+                sum += b[i] * b[i] * h / r[i];
+            }
+            pw.write(String.valueOf(sum) + ", ");
+        }
+
+        pw.close();
+    }
+
     private double[] getColumn(int column) {
         double[] c = new double[matrixSP.length];
         for (int i = 0; i < matrixSP.length; i++) {
@@ -175,16 +194,63 @@ class Creator {
     }
 
     public void checkingCorrelation() {
-        int N = matrixSP.length;
-        double buff;
-        for (int h = 0; h < N; h++) {
-            buff = 0;
-            for (int i = 0; i < N - h; i++) {
-                buff = matrixSP[i][0] * matrixSP[i + h][0];
-            }
-            buff /= (N - h);
-            System.out.print(buff + " ");
+        int T = matrixSP.length;
+        double res;
+        for (int i = 0; i < matrixSP.length; i++) {
+            double a = chisl(i, getColumn(0));
+            double b = zn1(i, getColumn(0));
+            double c = zn2(i, getColumn(0));
+            // System.out.println(a + " " + b + " " + c);
+            System.out.print(" " + a / b / c);
         }
-        System.out.println("");
+        // System.out.println("");
+    }
+
+    private double zn1(int s, double[] y) {
+        int T = y.length;
+        double sum = 0;
+        for (int l = 0; l < T - s; l++) {
+            sum += y[l];
+        }
+        double sum1 = sum / (T - s);
+        sum = 0;
+        for (int t = 0; t < T - s; t++) {
+            sum += (y[t] - sum1) * (y[t] - sum1);
+        }
+        return Math.sqrt(sum / (T - s));
+    }
+
+    private double zn2(int s, double[] y) {
+        int T = y.length;
+        double sum = 0;
+        for (int l = 0; l < T - s; l++) {
+            sum += y[l + s];
+        }
+        double sum1 = sum / (T - s);
+        sum = 0;
+        for (int t = 0; t < T - s; t++) {
+            sum += (y[t + s] - sum1) * (y[t + s] - sum1);
+        }
+        return Math.sqrt(sum / (T - s));
+    }
+
+    private double chisl(int s, double[] y) {
+        int T = y.length;
+        double sum = 0;
+        for (int l = 0; l < T - s; l++) {
+            sum += y[l];
+        }
+        double firstSum = sum / (T - s);
+        sum = 0;
+        for (int l = 0; l < T - s; l++) {
+            sum += y[l + s];
+        }
+        double secondSum = sum / (T - s);
+
+        sum = 0;
+        for (int t = 0; t < T - s; t++) {
+            sum += (y[t] - firstSum) * (y[t + s] - secondSum);
+        }
+        return sum / (T - s);
     }
 }
