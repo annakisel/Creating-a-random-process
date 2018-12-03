@@ -15,11 +15,13 @@ public class Main {
             creator.fillInNoiseFromFile();
             creator.fillInMatrix();
             creator.createZ();
-            creator.calcDispersionOfZ();
+            creator.calcDispAndSampleZ();
             creator.calcEstimationOfSemivar();
             creator.calcEstimationOfZ();
             // creator.checkingCorrelation();
             creator.semivarOfZ();
+            creator.dispAndSampleOfEveryProcess();
+            creator.Rz();
         } catch (FileNotFoundException e) {
             System.out.println("file not found");
         }
@@ -104,24 +106,61 @@ class Creator {
         pw.close();
     }
 
-    private double sampleOfZ() {
+    private double sample(double[] z) {
         double _z = 0;
-        for (int i = 0; i < n; i++) {
-            _z += z[i];
+        for (double aZ : z) {
+            _z += aZ;
         }
         _z /= n;
-        System.out.println("sampleOfZ " + _z);
+        System.out.println("среднее значение " + _z);
         return _z;
     }
 
-    public void calcDispersionOfZ() {
+    private void calcDispersion(double[] z) {
         double d = 0;
-        double _z = sampleOfZ();
-        for (int i = 0; i < n; i++) {
-            d += Math.pow(z[i] - _z, 2);
+        double _z = sample(z);
+        for (double aZ : z) {
+            d += Math.pow(aZ - _z, 2);
         }
         d /= n;
-        System.out.println("calcDispersionOfZ " + d);
+        System.out.println("дисперсия " + d);
+    }
+
+    public void calcDispAndSampleZ() {
+        System.out.println("--------process z--------");
+        calcDispersion(z);
+    }
+
+    public double R(double h, double r) {
+        if (Math.abs(h) > r) {
+            return 0;
+        } else {
+            return (1.0 - Math.abs(h) / r);
+        }
+    }
+
+    public void Rz() throws FileNotFoundException {
+        double sum;
+        PrintWriter pw = new PrintWriter("Rz.txt");
+
+        for (int h = 0; h < n; h++) {
+            sum = 0;
+            for (int j = 0; j < matrixSP.length; j++) {
+                sum += (b[j] * b[j] * R(h, r[j]));
+            }
+            if (h < 30) {
+                pw.write(String.valueOf(sum) + ", ");
+            }
+        }
+        pw.close();
+    }
+
+    public void dispAndSampleOfEveryProcess() {
+        System.out.println("--------matrix--------");
+        for (int i = 0; i < matrixSP.length; i++) {
+            System.out.print(i + 1 + " ");
+            calcDispersion(matrixSP[i]);
+        }
     }
 
     public void calcEstimationOfSemivar() throws FileNotFoundException {
@@ -137,9 +176,9 @@ class Creator {
                     sum += Math.pow(matrixSP[j][i] - matrixSP[j][i + h], 2);
                 }
                 estim[j][h] = sum / 2.0 / (n - h);
-                // if (h <= 3 * n / 4) {
-                pw.write(String.valueOf(estim[j][h]) + ", ");
-                // }
+                if (h < 20) {
+                    pw.write(String.valueOf(estim[j][h]) + ", ");
+                }
             }
             pw.write("\n");
         }
@@ -162,18 +201,16 @@ class Creator {
     }
 
     public void semivarOfZ() throws FileNotFoundException {
-        // double[] sZ = new double[n];
         double sum;
         PrintWriter pw = new PrintWriter("sZ.txt");
 
         for (int h = 0; h < n; h++) {
             sum = 0;
             for (int i = 0; i < b.length; i++) {
-                sum += b[i] * b[i] * h / r[i];
+                sum += (b[i] * b[i] * h / r[i]);
             }
             pw.write(String.valueOf(sum) + ", ");
         }
-
         pw.close();
     }
 
