@@ -1,7 +1,3 @@
-import org.apache.commons.math3.linear.Array2DRowRealMatrix;
-import org.apache.commons.math3.linear.RealMatrix;
-import org.apache.commons.math3.stat.correlation.SpearmansCorrelation;
-
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.PrintWriter;
@@ -22,6 +18,7 @@ public class Main {
             creator.semivarOfZ();
             creator.dispAndSampleOfEveryProcess();
             creator.Rz();
+            System.out.println(creator.R(0, 16));
         } catch (FileNotFoundException e) {
             System.out.println("file not found");
         }
@@ -39,8 +36,8 @@ class Creator {
     public Creator() {
         n = 100;
         r = new double[]{1.0, 2.0, 4.0, 8.0, 16.0};
-        b = new double[]{0.1, 0.1, 0.3, 0.3, 0.2};
-        // b = new double[]{1.0, 2.0, 3.0, 4.0, 5.0};
+        // b = new double[]{0.1, 0.1, 0.3, 0.3, 0.2};
+        b = new double[]{1.0, 2.0, 3.0, 4.0, 5.0};
 
         x = new double[n];
         z = new double[n];
@@ -108,8 +105,8 @@ class Creator {
 
     private double sample(double[] z) {
         double _z = 0;
-        for (double aZ : z) {
-            _z += aZ;
+        for (double item : z) {
+            _z += item;
         }
         _z /= n;
         System.out.println("среднее значение " + _z);
@@ -207,87 +204,10 @@ class Creator {
         for (int h = 0; h < n; h++) {
             sum = 0;
             for (int i = 0; i < b.length; i++) {
-                sum += (b[i] * b[i] * h / r[i]);
+                sum += (b[i] * b[i] * (1 - R(h, r[i])));
             }
             pw.write(String.valueOf(sum) + ", ");
         }
         pw.close();
-    }
-
-    private double[] getColumn(int column) {
-        double[] c = new double[matrixSP.length];
-        for (int i = 0; i < matrixSP.length; i++) {
-            c[i] = matrixSP[i][column];
-        }
-        return c;
-    }
-
-    public void checkingSpearmansCorrelation() {
-        // double[][] m = {{1.0, 2.0}, {2.0, 4.0}};
-        RealMatrix matrix = new Array2DRowRealMatrix(matrixSP);
-        SpearmansCorrelation corrInstance = new SpearmansCorrelation();
-        double print = corrInstance.correlation(getColumn(0), getColumn(3));
-        System.out.println(print);
-    }
-
-    public void checkingCorrelation() {
-        int T = matrixSP.length;
-        double res;
-        for (int i = 0; i < matrixSP.length; i++) {
-            double a = chisl(i, getColumn(0));
-            double b = zn1(i, getColumn(0));
-            double c = zn2(i, getColumn(0));
-            // System.out.println(a + " " + b + " " + c);
-            System.out.print(" " + a / b / c);
-        }
-        // System.out.println("");
-    }
-
-    private double zn1(int s, double[] y) {
-        int T = y.length;
-        double sum = 0;
-        for (int l = 0; l < T - s; l++) {
-            sum += y[l];
-        }
-        double sum1 = sum / (T - s);
-        sum = 0;
-        for (int t = 0; t < T - s; t++) {
-            sum += (y[t] - sum1) * (y[t] - sum1);
-        }
-        return Math.sqrt(sum / (T - s));
-    }
-
-    private double zn2(int s, double[] y) {
-        int T = y.length;
-        double sum = 0;
-        for (int l = 0; l < T - s; l++) {
-            sum += y[l + s];
-        }
-        double sum1 = sum / (T - s);
-        sum = 0;
-        for (int t = 0; t < T - s; t++) {
-            sum += (y[t + s] - sum1) * (y[t + s] - sum1);
-        }
-        return Math.sqrt(sum / (T - s));
-    }
-
-    private double chisl(int s, double[] y) {
-        int T = y.length;
-        double sum = 0;
-        for (int l = 0; l < T - s; l++) {
-            sum += y[l];
-        }
-        double firstSum = sum / (T - s);
-        sum = 0;
-        for (int l = 0; l < T - s; l++) {
-            sum += y[l + s];
-        }
-        double secondSum = sum / (T - s);
-
-        sum = 0;
-        for (int t = 0; t < T - s; t++) {
-            sum += (y[t] - firstSum) * (y[t + s] - secondSum);
-        }
-        return sum / (T - s);
     }
 }
