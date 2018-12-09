@@ -33,15 +33,38 @@ class Creator {
     private double[] r;
     private double[] b;
 
-    public Creator() {
+    public Creator() throws FileNotFoundException {
         n = 100;
-        r = new double[]{1.0, 2.0, 4.0, 8.0, 16.0};
+        r = new double[]{1.0, 2.0, 3.0, 4.0, 5.0};
         // b = new double[]{0.1, 0.1, 0.3, 0.3, 0.2};
         b = new double[]{1.0, 2.0, 3.0, 4.0, 5.0};
 
         x = new double[n];
         z = new double[n];
         matrixSP = new double[5][n];
+
+        PrintWriter pw = new PrintWriter("R.txt");
+
+        for (int k = 0; k < 5; k++) {
+            for (int i = 0; i <= 10; i++) {
+                pw.write(String.valueOf(R(i, r[k])) + ", ");
+            }
+            pw.write(String.valueOf("\n"));
+
+        }
+        pw.close();
+
+        PrintWriter pw1 = new PrintWriter("semivar.txt");
+        double a;
+        for (int k = 0; k < 5; k++) {
+            for (int i = 0; i <= 10; i++) {
+                a = R(0, r[k]) - R(i, r[k]);
+                pw1.write(String.valueOf(a) + ", ");
+            }
+            pw1.write(String.valueOf("\n"));
+
+        }
+        pw1.close();
     }
 
     public void writeNoiseInFile() throws FileNotFoundException {
@@ -145,8 +168,8 @@ class Creator {
             for (int j = 0; j < matrixSP.length; j++) {
                 sum += (b[j] * b[j] * R(h, r[j]));
             }
-            if (h < 30) {
-                pw.write(String.valueOf(sum) + ", ");
+            if (h <= 10) {
+            pw.write(String.valueOf(sum) + ", ");
             }
         }
         pw.close();
@@ -173,7 +196,7 @@ class Creator {
                     sum += Math.pow(matrixSP[j][i] - matrixSP[j][i + h], 2);
                 }
                 estim[j][h] = sum / 2.0 / (n - h);
-                if (h < 20) {
+                if (h <= 10) {
                     pw.write(String.valueOf(estim[j][h]) + ", ");
                 }
             }
@@ -192,7 +215,9 @@ class Creator {
                 sum += Math.pow(z[i] - z[i + h], 2);
             }
             buff = sum / 2.0 / (n - h);
-            pw.write(String.valueOf(buff) + ", ");
+            if (h <= 10) {
+                pw.write(String.valueOf(buff) + ", ");
+            }
         }
         pw.close();
     }
@@ -206,7 +231,9 @@ class Creator {
             for (int i = 0; i < b.length; i++) {
                 sum += (b[i] * b[i] * (1 - R(h, r[i])));
             }
-            pw.write(String.valueOf(sum) + ", ");
+            if (h <= 10) {
+                pw.write(String.valueOf(sum) + ", ");
+            }
         }
         pw.close();
     }
