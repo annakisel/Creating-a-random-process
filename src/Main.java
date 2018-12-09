@@ -14,11 +14,9 @@ public class Main {
             creator.calcDispAndSampleZ();
             creator.calcEstimationOfSemivar();
             creator.calcEstimationOfZ();
-            // creator.checkingCorrelation();
             creator.semivarOfZ();
             creator.dispAndSampleOfEveryProcess();
             creator.Rz();
-            System.out.println(creator.R(0, 16));
         } catch (FileNotFoundException e) {
             System.out.println("file not found");
         }
