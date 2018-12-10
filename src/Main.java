@@ -137,8 +137,8 @@ class Creator {
     private void calcDispersion(double[] z) {
         double d = 0;
         double _z = sample(z);
-        for (double aZ : z) {
-            d += Math.pow(aZ - _z, 2);
+        for (int i = 0; i < z.length; i++) {
+            d = d + (z[i] - _z) * (z[i] - _z);
         }
         d /= n;
         System.out.println("дисперсия " + d);
@@ -149,7 +149,7 @@ class Creator {
         calcDispersion(z);
     }
 
-    public double R(double h, double r) {
+    private double R(double h, double r) {
         if (Math.abs(h) > r) {
             return 0;
         } else {
@@ -167,7 +167,7 @@ class Creator {
                 sum += (b[j] * b[j] * R(h, r[j]));
             }
             if (h <= 10) {
-            pw.write(String.valueOf(sum) + ", ");
+                pw.write(String.valueOf(sum) + ", ");
             }
         }
         pw.close();
